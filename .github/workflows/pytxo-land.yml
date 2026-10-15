@@ -28,3 +28,6 @@ jobs:
           inputs: "agent/*"
           checks: "npm install && npm test"
           per-input: "true"
+      # Verification only: print the summary the action wrote, so it can be read without signing in.
+      - if: always()
+        run: cat pytxo-land.md

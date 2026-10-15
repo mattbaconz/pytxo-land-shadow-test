@@ -2,7 +2,7 @@ function toArr(any) {
 	return any == null ? [] : Array.isArray(any) ? any : [any];
 }
 
-function toVal(out, key, val, opts) {
+function assign(out, key, val, opts) {
 	var x, old=out[key], nxt=(
 		!!~opts.string.indexOf(key) ? (val == null || val === true ? '' : String(val))
 		: typeof val === 'boolean' ? val
@@ -93,7 +93,7 @@ export default function (args, opts) {
 			for (idx=0; idx < arr.length; idx++) {
 				name = arr[idx];
 				if (strict && !~keys.indexOf(name)) return opts.unknown('-'.repeat(j) + name);
-				toVal(out, name, (idx + 1 < arr.length) || val, opts);
+				assign(out, name, (idx + 1 < arr.length) || val, opts);
 			}
 		}
 	}

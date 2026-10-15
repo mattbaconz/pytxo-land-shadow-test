@@ -9,6 +9,35 @@ test('parse args', t => {
 	t.end();
 });
 
+test('negated flags collect repeated values', t => {
+	t.deepEqual(fn(['--no-moo', '--no-moo']), { moo: [false, false], _: [] }, 'repeated negations');
+	t.deepEqual(fn(['--moo', '--no-moo']), { moo: [true, false], _: [] }, 'positive then negative');
+	t.deepEqual(fn(['--no-moo', '--moo']), { moo: [false, true], _: [] }, 'negative then positive');
+	t.deepEqual(fn(['--moo', '1', '--moo', '2', '--no-moo']), { moo: [1, 2, false], _: [] }, 'append to existing array');
+	t.deepEqual(fn(['--moo', '--no-moo'], { boolean: 'moo' }), { moo: [true, false], _: [] }, 'boolean option');
+	t.end();
+});
+
+test('negated flags respect string options and aliases', t => {
+	t.deepEqual(fn(['--no-moo'], { string: 'moo' }), { moo: 'false', _: [] }, 'string option');
+	t.deepEqual(
+		fn(['--moo', 'yes', '--no-moo', '--no-moo'], { string: 'moo' }),
+		{ moo: ['yes', 'false', 'false'], _: [] },
+		'repeated string values'
+	);
+	t.deepEqual(
+		fn(['--no-moo', '--no-moo'], { alias: { moo: 'm' } }),
+		{ moo: [false, false], m: [false, false], _: [] },
+		'aliases receive collected values'
+	);
+	t.deepEqual(
+		fn(['--no-moo'], { string: 'm', alias: { m: 'moo' } }),
+		{ moo: 'false', m: 'false', _: [] },
+		'string option inherited from alias'
+	);
+	t.end();
+});
+
 test('comprehensive', t => {
 	t.deepEqual(
 		fn([
@@ -322,9 +351,9 @@ test('flag boolean with default string & alias', t => {
 	t.same(bar, { t:'', tt:'', _:[] });
 	t.is(typeof bar.t, 'string');
 
-	// --no-* overrides
+	// --no-* follows the type inferred from the default
 	const baz = fn(['--no-two'], { default: { two:'hi' }});
-	t.same(baz, { two:false, _:[] });
-	t.is(typeof baz.two, 'boolean');
+	t.same(baz, { two:'false', _:[] });
+	t.is(typeof baz.two, 'string');
 	t.end();
 });

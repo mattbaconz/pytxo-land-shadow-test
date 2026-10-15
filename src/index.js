@@ -80,7 +80,7 @@ export default function (args, opts) {
 			if (strict && !~keys.indexOf(name)) {
 				return opts.unknown(arg);
 			}
-			out[name] = false;
+			toVal(out, name, false, opts);
 		} else {
 			for (idx=j+1; idx < arg.length; idx++) {
 				if (arg.charCodeAt(idx) === 61) break; // "="

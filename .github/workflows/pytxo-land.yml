@@ -1,0 +1,30 @@
+name: Pytxo land (shadow)
+on:
+  pull_request:
+    types: [opened, synchronize, labeled]
+permissions:
+  contents: read
+  pull-requests: read
+jobs:
+  land:
+    if: contains(github.event.pull_request.labels.*.name, 'agent')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Fetch open agent pull requests
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for n in $(gh pr list --label agent --state open --json number --jq '.[].number'); do
+            git fetch origin "pull/$n/head:agent/pr-$n"
+          done
+      - uses: Pytxo-dev/pytxo/actions/land@v1.3.0
+        with:
+          inputs: "agent/*"
+          checks: "npm install && npm test"
+          per-input: "true"
